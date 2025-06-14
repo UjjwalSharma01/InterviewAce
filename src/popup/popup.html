@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Buddy</title>
+  <style>
+    :root {
+      --bg-dark: #1a1a1a;
+      --bg-dark-secondary: #262626;
+      --bg-light: #f5f5f5;
+      --bg-light-secondary: #e0e0e0;
+      --text-dark: #e0e0e0;
+      --text-dark-secondary: #a0a0a0;
+      --text-light: #333333;
+      --text-light-secondary: #666666;
+      --accent-blue: #3a86ff;
+      --accent-green: #38b000;
+      --accent-red: #e63946;
+      --border-radius: 8px;
+      --shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.5);
+      --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.15);
+      
+      /* Provider colors */
+      --openai-color: #10a37f;
+      --anthropic-color: #b165ff;
+      --gemini-color: #4285f4;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      width: 400px;
+      min-height: 500px;
+    }
+    
+    body.dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    
+    header {
+      padding: 16px;
+      background-color: var(--bg-light-secondary);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode header {
+      background-color: var(--bg-dark-secondary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo {
+      width: 24px;
+      height: 24px;
+    }
+    
+    main {
+      padding: 16px;
+    }
+    
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 16px;
+    }
+    
+    body.dark-mode .tab-nav {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .tab-button {
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-light-secondary);
+      border-bottom: 2px solid transparent;
+    }
+    
+    body.dark-mode .tab-button {
+      color: var(--text-dark-secondary);
+    }
+    
+    .tab-button.active {
+      color: var(--accent-blue);
+      border-bottom: 2px solid var(--accent-blue);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      box-sizing: border-box;
+    }
+    
+    body.dark-mode input[type="text"],
+    body.dark-mode input[type="password"] {
+      background-color: var(--bg-dark-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-dark);
+    }
+    
+    button {
+      padding: 10px 16px;
+      background-color: var(--accent-blue);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #2a75f3;
+    }
+    
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .toggle-switch label {
+      margin-bottom: 0;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--accent-blue);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+    
+    .status-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-pill.success {
+      background-color: rgba(56, 176, 0, 0.2);
+      color: var(--accent-green);
+    }
+    
+    .status-pill.error {
+      background-color: rgba(230, 57, 70, 0.2);
+      color: var(--accent-red);
+    }
+    
+    .slider-control {
+      margin-bottom: 16px;
+    }
+    
+    .slider-control-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .slider-value {
+      min-width: 30px;
+      text-align: right;
+      font-size: 14px;
+    }
+    
+    input[type="range"] {
+      flex: 1;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    
+    .action-buttons button {
+      flex: 1;
+    }
+    
+    .api-key-group {
+      position: relative;
+    }
+    
+    .api-key-group .toggle-visibility {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-light-secondary);
+      padding: 0;
+      cursor: pointer;
+    }
+    
+    body.dark-mode .api-key-group .toggle-visibility {
+      color: var(--text-dark-secondary);
+    }
+    
+    .api-key-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    
+    .status-message {
+      color: var(--text-light-secondary);
+    }
+    
+    body.dark-mode .status-message {
+      color: var(--text-dark-secondary);
+    }
+    
+    .provider-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    
+    .provider-badge.openai {
+      background-color: rgba(16, 163, 127, 0.2);
+      color: var(--openai-color);
+    }
+    
+    .provider-badge.anthropic {
+      background-color: rgba(177, 101, 255, 0.2);
+      color: var(--anthropic-color);
+    }
+    
+    .provider-badge.gemini {
+      background-color: rgba(66, 133, 244, 0.2);
+      color: var(--gemini-color);
+    }
+    
+    .session-info {
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    
+    body.dark-mode .session-info {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .session-info p {
+      margin: 4px 0;
+      font-size: 13px;
+    }
+    
+    .version-info {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-light-secondary);
+      margin-top: 20px;
+    }
+    
+    body.dark-mode .version-info {
+      color: var(--text-dark-secondary);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      <img src="../assets/icons/icon48.png" alt="Interview Buddy Logo" class="logo">
+      Interview Buddy
+    </h1>
+  </header>
+  
+  <main>
+    <div class="tab-nav">
+      <button class="tab-button active" data-tab="status">Status</button>
+      <button class="tab-button" data-tab="settings">Settings</button>
+      <button class="tab-button" data-tab="api-keys">API Keys</button>
+      <button class="tab-button" data-tab="about">About</button>
+    </div>
+    
+    <!-- Status Tab -->
+    <div class="tab-content active" id="status-tab">
+      <div class="session-info">
+        <p><strong>Status:</strong> <span class="status-pill success">Ready</span></p>
+        <p><strong>Active Provider:</strong> <span id="active-provider">Gemini 2.5 Flash</span> <span class="provider-badge gemini">Gemini</span></p>
+        <p><strong>Last Used:</strong> <span id="last-used">Never</span></p>
+      </div>
+      
+      <div class="action-buttons">
+        <button id="launch-button">Launch Interview Assistant</button>
+      </div>
+    </div>
+    
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings-tab">
+      <div class="toggle-switch">
+        <label for="dark-mode-toggle">Dark Mode</label>
+        <label class="switch">
+          <input type="checkbox" id="dark-mode-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-switch">
+        <label for="low-contrast-toggle">Low Contrast Mode</label>
+        <label class="switch">
+          <input type="checkbox" id="low-contrast-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="slider-control">
+        <label for="question-font-size">Question Font Size: <span id="question-size-value">16px</span></label>
+        <div class="slider-control-inner">
+          <input type="range" id="question-font-size" min="12" max="24" value="16">
+        </div>
+      </div>
+      
+      <div class="slider-control">
+        <label for="response-font-size">Response Font Size: <span id="response-size-value">16px</span></label>
+        <div class="slider-control-inner">
+          <input type="range" id="response-font-size" min="12" max="24" value="16">
+        </div>
+      </div>
+      
+      <button id="save-settings-button">Save Settings</button>
+    </div>
+    
+    <!-- API Keys Tab -->
+    <div class="tab-content" id="api-keys-tab">
+      <div class="form-group">
+        <label for="openai-api-key">OpenAI API Key</label>
+        <div class="api-key-group">
+          <input type="password" id="openai-api-key" placeholder="sk-...">
+          <button class="toggle-visibility" data-for="openai-api-key">👁️</button>
+        </div>
+        <div class="api-key-status">
+          <span class="status-message" id="openai-status">Not set</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="anthropic-api-key">Anthropic API Key</label>
+        <div class="api-key-group">
+          <input type="password" id="anthropic-api-key" placeholder="sk-ant-...">
+          <button class="toggle-visibility" data-for="anthropic-api-key">👁️</button>
+        </div>
+        <div class="api-key-status">
+          <span class="status-message" id="anthropic-status">Not set</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="gemini-api-key">Gemini API Key</label>
+        <div class="api-key-group">
+          <input type="password" id="gemini-api-key" placeholder="AI...">
+          <button class="toggle-visibility" data-for="gemini-api-key">👁️</button>
+        </div>
+        <div class="api-key-status">
+          <span class="status-message" id="gemini-status">Not set</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="assemblyai-api-key">AssemblyAI API Key (Transcription)</label>
+        <div class="api-key-group">
+          <input type="password" id="assemblyai-api-key" placeholder="...">
+          <button class="toggle-visibility" data-for="assemblyai-api-key">👁️</button>
+        </div>
+        <div class="api-key-status">
+          <span class="status-message" id="assemblyai-status">Not set</span>
+        </div>
+      </div>
+      
+      <button id="save-api-keys-button">Save API Keys</button>
+    </div>
+    
+    <!-- About Tab -->
+    <div class="tab-content" id="about-tab">
+      <p>Interview Buddy helps you ace your interviews with real-time AI assistance during video calls.</p>
+      
+      <h3>Features:</h3>
+      <ul>
+        <li>Real-time transcription with AssemblyAI</li>
+        <li>Multiple AI providers (OpenAI, Claude, Gemini)</li>
+        <li>Screen share invisibility</li>
+        <li>Customizable UI with dark mode</li>
+        <li>Privacy-focused design</li>
+      </ul>
+      
+      <h3>Keyboard Shortcuts:</h3>
+      <ul>
+        <li><strong>Ctrl+Shift+H</strong>: Toggle window visibility</li>
+        <li><strong>Ctrl+Shift+C</strong>: Clear context</li>
+        <li><strong>Ctrl+Shift+R</strong>: Regenerate response</li>
+        <li><strong>Escape</strong>: Pause/resume transcription</li>
+      </ul>
+      
+      <div class="version-info">
+        Version 1.0.0
+      </div>
+    </div>
+  </main>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

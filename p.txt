@@ -1,0 +1,224 @@
+Here's a comprehensive GitHub Copilot prompt for your Chrome extension:
+
+---
+
+## **Chrome Extension Prompt for GitHub Copilot**
+
+```
+Create a Chrome extension for real-time interview assistance with the following detailed specifications:
+
+## CORE ARCHITECTURE
+- Manifest V3 Chrome extension
+- Content script injection for video call platforms (Zoom, Google Meet, Teams)
+- Background service worker for API calls and audio processing
+- Floating overlay UI with transparency and drag/resize capabilities
+- Real-time speech-to-text transcription using AssemblyAI
+- Multi-AI provider support (OpenAI, Claude, Gemini)
+
+## UI/UX REQUIREMENTS
+
+### Dark Mode Implementation
+- Pure dark theme with NO GLARE components
+- Use dark grays (#1a1a1a, #262626) instead of pure black
+- Muted white text (#e0e0e0) instead of bright white
+- No shiny/reflective surfaces or glossy buttons
+- Subtle shadows and borders for depth
+- Low contrast mode for comfort during long interviews
+
+### Text Size Controls
+- Dynamic font size slider (12px - 24px range)
+- Separate controls for questions and responses
+- Persistent size preferences in Chrome storage
+- Accessibility compliance (WCAG 2.1 AA)
+
+### Multi-AI Provider System
+- Provider selector in popup: OpenAI GPT-4, Claude 3.5, Gemini Pro
+- Real-time provider switching in floating window
+- Regenerate button with dropdown for 2 AI providers max
+- Provider-specific settings (temperature, max tokens)
+- Fallback system if primary provider fails
+
+## FLOATING WINDOW SPECIFICATIONS
+
+### Visual Properties
+- 40% transparency background with blur effect
+- Draggable header with grip indicators
+- Resizable corners with smooth scaling
+- Minimum size: 300x200px, Maximum: 80% of screen
+- Rounded corners (8px) with subtle border
+- Always on top but respects modal dialogs
+
+### Navigation Panel (Left Side)
+- Collapsible question list: "Q1", "Q2", etc.
+- Click to jump to specific question/response
+- Visual indicators for answered/unanswered questions
+- Context clear button with confirmation dialog
+- Export conversation history option
+
+### Response Area (Right Side)
+- Real-time streaming text display
+- Provider badge showing current AI service
+- Regenerate button with provider selection dropdown
+- Copy to clipboard functionality
+- Timestamp for each response
+
+## CRITICAL STEALTH FEATURES
+
+### Screen Share Invisibility
+- Check if screen sharing is active via desktopCapture API
+- Automatically hide floating window during screen capture
+- Alternative: Use browser-level CSS filters to exclude from capture
+- Monitor for screen recording applications (OBS, etc.)
+- Fallback: Minimize to system tray notification
+
+### Hover-Based Response Pausing
+- Detect mouse enter/leave events on floating window
+- Pause AI response streaming when hovering
+- Buffer responses in background
+- Resume display when mouse leaves
+- Visual indicator showing paused state
+
+## AUDIO PROCESSING & TRANSCRIPTION
+
+### Real-time Audio Capture
+- getUserMedia() for microphone input (user speech)
+- Tab audio capture for interviewer speech
+- Speaker detection logic with audio level thresholds
+- WebSocket connection to AssemblyAI streaming API
+- Audio chunk processing (250ms intervals)
+
+### Speaker Identification
+```
+function detectSpeaker(micActive, audioLevel, source) {
+  if (micActive && audioLevel > 0.3) return "user";
+  if (!micActive && audioLevel > 0.2) return "interviewer";
+  return "unknown";
+}
+```
+
+## CONTEXT MANAGEMENT
+
+### Question Threading
+- Each question creates new thread for display
+- Maintain single context for AI (all questions linked)
+- Context window management (last 10 interactions)
+- Smart context pruning to stay within token limits
+- Question categorization (technical, behavioral, etc.)
+
+### Data Persistence
+- Chrome storage for settings and conversation history
+- Session restoration on browser restart
+- Auto-save every 30 seconds
+- Export to JSON/CSV functionality
+- Import previous sessions capability
+
+## ADDITIONAL CRUCIAL FEATURES
+
+### Keyboard Shortcuts
+- Ctrl+Shift+H: Toggle floating window visibility
+- Ctrl+Shift+C: Clear current context
+- Ctrl+Shift+R: Regenerate last response
+- Escape: Pause/resume transcription
+
+### Privacy & Security
+- Local storage only (no cloud sync)
+- API key encryption in Chrome storage
+- Session timeout after 4 hours of inactivity
+- Option to disable transcription logging
+- Clear all data functionality
+
+### Performance Optimization
+- Lazy loading of AI responses
+- Request debouncing (500ms)
+- Memory usage monitoring
+- WebSocket connection pooling
+- Efficient DOM updates with virtual scrolling
+
+### Error Handling
+- Network connectivity checks
+- API rate limit handling with exponential backoff
+- Graceful degradation when APIs are unavailable
+- User-friendly error messages
+- Automatic retry mechanisms
+
+### Settings Panel
+- API key management for all providers
+- Audio input/output device selection
+- Transcription accuracy threshold settings
+- UI customization options
+- Backup/restore configuration
+
+## IMPLEMENTATION STRUCTURE
+
+### File Organization
+```
+/src
+  /manifest.json
+  /background/
+    - service-worker.js
+    - audio-processor.js
+    - api-manager.js
+  /content/
+    - content-script.js
+    - floating-window.js
+    - audio-capture.js
+  /popup/
+    - popup.html
+    - popup.js
+    - settings.js
+  /assets/
+    - icons/
+    - styles/
+```
+
+### Key Technologies
+- WebRTC for audio capture
+- WebSocket for real-time transcription
+- Intersection Observer for UI optimization
+- ResizeObserver for responsive floating window
+- MutationObserver for DOM changes detection
+
+### Testing Requirements
+- Unit tests for core functions
+- Integration tests for API calls
+- Mock audio input for testing
+- Cross-platform testing (Windows, Mac, Linux)
+- Performance benchmarking for memory usage
+
+Build this with modern JavaScript ES2022+, proper error handling, comprehensive logging, and production-ready code quality.
+```
+
+---
+
+This prompt covers all your requirements plus additional crucial features like keyboard shortcuts, privacy controls, performance optimization, and comprehensive error handling that are essential for a production-ready interview assistance extension.
+
+[1] https://developer.chrome.com/docs/webstore/best-practices
+[2] https://github.com/OrenGrinker/chromeGenAIChatExtension
+[3] https://stackoverflow.com/questions/4561907/chrome-extension-popup-floating-iframe
+[4] https://stackoverflow.com/questions/58353740/how-to-make-chrome-extension-popup-draggable
+[5] https://stackoverflow.com/questions/30778219/chrome-extension-hide-screensharing-message-window
+[6] https://stackoverflow.com/questions/55792406/is-it-possible-to-switch-on-off-the-extension-from-the-popup-without-the-chrome
+[7] https://github.com/notAbhay321/ask-multiple-ai-assistant-at-once
+[8] https://www.designstudiouiux.com/blog/dark-mode-ui-design-best-practices/
+[9] https://groups.google.com/g/tiddlywiki/c/5TxOTeJOnXA
+[10] https://stackoverflow.com/questions/35570080/closing-the-stop-sharing-hide-window-on-chrome-desktop-capture
+[11] https://atmos.style/blog/dark-mode-ui-best-practices
+[12] https://www.uxdesigninstitute.com/blog/dark-mode-design-practical-guide/
+[13] https://www.youtube.com/watch?v=yWvvfOXeHr4
+[14] https://www.youtube.com/watch?v=NH52jzJg7SY
+[15] https://www.tomshardware.com/how-to/block-google-ai-overviews
+[16] https://superuser.com/questions/1368597/how-to-stop-web-site-navigation-hover-pop-ups-in-browser
+[17] https://chromewebstore.google.com/detail/dark-mode/dmghijelimhndkbmpgbldicpogfkceaj
+[18] https://groups.google.com/a/chromium.org/g/chromium-extensions/c/7As9MKhav5E
+[19] https://chromewebstore.google.com/detail/a+-fontsize-changer/ckihgechpahhpompcinglebkgcdgpkil
+[20] https://chromewebstore.google.com/detail/popout-plus/dfhigdjfidfnbmhockldodfnnaaolplm
+[21] https://web.dev/articles/drag-and-drop
+[22] https://developer.chrome.com/docs/css-ui/scrollbar-styling
+[23] https://softwarerecs.stackexchange.com/questions/2586/is-there-a-chrome-extension-that-i-can-use-to-test-a-responsive-design
+[24] https://support.focus.teamleader.eu/hc/en-150/articles/25694834585617-FAQ-What-to-do-if-the-Chrome-extension-doesn-t-work
+[25] https://stackoverflow.com/questions/5789739/how-to-use-chrome-web-inspector-to-view-hover-code
+[26] https://www.reddit.com/r/techsupport/comments/1hqfgmt/disable_ai_suggestion_gui_when_my_mouse_hovers_at/
+[27] https://support.google.com/chrome/thread/15306413/cursor-hover-issue
+[28] https://developer.chrome.com/docs/devtools/console/understand-messages
+[29] https://www.trymaverick.com/blog-posts/top-10-ai-chrome-extensions-supercharge-your-browsing-experience
+[30] https://github.com/pulzeai-oss/chrome-ai-assistant

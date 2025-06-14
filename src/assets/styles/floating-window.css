@@ -1,0 +1,582 @@
+/* Floating window styles for Interview Buddy */
+
+/* Variables */
+:root {
+  --bg-dark: #1a1a1a;
+  --bg-dark-secondary: #262626;
+  --bg-light: #f5f5f5;
+  --bg-light-secondary: #e0e0e0;
+  --text-dark: #e0e0e0;
+  --text-dark-secondary: #a0a0a0;
+  --text-light: #333333;
+  --text-light-secondary: #666666;
+  --accent-blue: #3a86ff;
+  --accent-green: #38b000;
+  --accent-red: #e63946;
+  --border-radius: 8px;
+  --shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --window-opacity: 0.95;
+  
+  /* Provider colors */
+  --openai-color: #10a37f;
+  --anthropic-color: #b165ff;
+  --gemini-color: #4285f4;
+}
+
+/* Base styles for the floating window */
+#interview-buddy-window {
+  position: fixed;
+  z-index: 9999;
+  width: 400px;
+  height: 500px;
+  background-color: var(--bg-light);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: var(--window-opacity);
+  backdrop-filter: blur(10px);
+  transition: opacity 0.3s, transform 0.3s, width 0.2s, height 0.2s;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Dark mode */
+#interview-buddy-window.dark-mode {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+  box-shadow: var(--shadow-dark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Low contrast mode */
+#interview-buddy-window.low-contrast {
+  --text-dark: #c0c0c0;
+  --text-dark-secondary: #808080;
+  --text-light: #555555;
+  --text-light-secondary: #888888;
+}
+
+/* Header styles */
+#interview-buddy-header {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background-color: var(--bg-light-secondary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: move;
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-header {
+  background-color: var(--bg-dark-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drag-handle {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.drag-handle::before,
+.drag-handle::after {
+  content: '';
+  width: 15px;
+  height: 2px;
+  background-color: var(--text-light-secondary);
+  margin: 2px 0;
+  border-radius: 2px;
+}
+
+#interview-buddy-window.dark-mode .drag-handle::before,
+#interview-buddy-window.dark-mode .drag-handle::after {
+  background-color: var(--text-dark-secondary);
+}
+
+.header-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+#interview-buddy-window.dark-mode .header-title {
+  color: var(--text-dark);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-controls button {
+  background: none;
+  border: none;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-light-secondary);
+}
+
+#interview-buddy-window.dark-mode .header-controls button {
+  color: var(--text-dark-secondary);
+}
+
+.header-controls button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+#interview-buddy-window.dark-mode .header-controls button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#interview-buddy-record {
+  position: relative;
+}
+
+#interview-buddy-record .record-icon {
+  color: var(--accent-red);
+}
+
+#interview-buddy-record.recording .record-icon {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Content area */
+#interview-buddy-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+#interview-buddy-sidebar {
+  width: 150px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-light);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-sidebar {
+  background-color: var(--bg-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#interview-buddy-questions-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.question-item {
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#interview-buddy-window.dark-mode .question-item {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.question-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+#interview-buddy-window.dark-mode .question-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.question-item.selected {
+  background-color: rgba(58, 134, 255, 0.2);
+}
+
+#interview-buddy-window.dark-mode .question-item.selected {
+  background-color: rgba(58, 134, 255, 0.3);
+}
+
+.question-number {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-light-secondary);
+}
+
+#interview-buddy-window.dark-mode .question-number {
+  color: var(--text-dark-secondary);
+}
+
+.question-text {
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#interview-buddy-sidebar-controls {
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-sidebar-controls {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#interview-buddy-sidebar-controls button {
+  flex: 1;
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-light);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-sidebar-controls button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dark);
+}
+
+#interview-buddy-sidebar-controls button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-sidebar-controls button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Main content area */
+#interview-buddy-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+#interview-buddy-response-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  position: relative;
+  background-color: var(--bg-light);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-light);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-response-area {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.response-text {
+  margin-bottom: 16px;
+}
+
+.response-timestamp {
+  font-size: 12px;
+  color: var(--text-light-secondary);
+  text-align: right;
+}
+
+#interview-buddy-window.dark-mode .response-timestamp {
+  color: var(--text-dark-secondary);
+}
+
+#interview-buddy-provider-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-light-secondary);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-provider-badge {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-dark-secondary);
+}
+
+.provider-badge.provider-openai {
+  background-color: rgba(16, 163, 127, 0.2);
+  color: var(--openai-color);
+}
+
+.provider-badge.provider-anthropic {
+  background-color: rgba(177, 101, 255, 0.2);
+  color: var(--anthropic-color);
+}
+
+.provider-badge.provider-gemini {
+  background-color: rgba(66, 133, 244, 0.2);
+  color: var(--gemini-color);
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--text-light-secondary);
+  font-style: italic;
+}
+
+#interview-buddy-window.dark-mode .loading-indicator {
+  color: var(--text-dark-secondary);
+}
+
+.waiting-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--text-light-secondary);
+  font-style: italic;
+}
+
+#interview-buddy-window.dark-mode .waiting-message {
+  color: var(--text-dark-secondary);
+}
+
+.error-message {
+  padding: 12px;
+  background-color: rgba(230, 57, 70, 0.1);
+  border-left: 3px solid var(--accent-red);
+  color: var(--accent-red);
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+/* Controls */
+#interview-buddy-controls {
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-controls {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#interview-buddy-controls button {
+  background: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-light);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-controls button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dark);
+}
+
+#interview-buddy-controls button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#interview-buddy-window.dark-mode #interview-buddy-controls button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+#interview-buddy-regenerate {
+  flex: 1;
+}
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 140px;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  width: 180px;
+  background-color: var(--bg-light);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  display: none;
+  z-index: 1000;
+}
+
+#interview-buddy-window.dark-mode .dropdown-menu {
+  background-color: var(--bg-dark-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-dark);
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: var(--text-light);
+  transition: background-color 0.2s;
+}
+
+#interview-buddy-window.dark-mode .dropdown-menu a {
+  color: var(--text-dark);
+}
+
+.dropdown-menu a:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#interview-buddy-window.dark-mode .dropdown-menu a:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: transparent;
+  z-index: 10;
+}
+
+.resize-handle-se {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+
+/* Notification */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 16px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 14px;
+  z-index: 10000;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fade-in 0.3s;
+}
+
+.notification-success {
+  background-color: rgba(56, 176, 0, 0.9);
+}
+
+.notification-error {
+  background-color: rgba(230, 57, 70, 0.9);
+}
+
+.notification-info {
+  background-color: rgba(58, 134, 255, 0.9);
+}
+
+.notification.fade-out {
+  animation: fade-out 0.3s;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(10px); }
+}
+
+/* Window states */
+#interview-buddy-window.minimized {
+  height: 40px !important;
+  overflow: hidden;
+}
+
+#interview-buddy-window.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Scrollbars */
+#interview-buddy-window ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+#interview-buddy-window ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#interview-buddy-window ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+#interview-buddy-window.dark-mode ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#interview-buddy-window ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+#interview-buddy-window.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
