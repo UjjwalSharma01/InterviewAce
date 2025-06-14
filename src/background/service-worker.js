@@ -104,6 +104,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       currentState.context = [];
       sendResponse({ success: true });
       return false;
+      
+    case 'TRANSCRIPT_RECEIVED':
+      handleTranscriptReceived(message, sender);
+      return true;
+      
+    case 'SPEAKER_DETECTED':
+      handleSpeakerDetected(message, sender);
+      return true;
+      
+    case 'OPEN_SETTINGS':
+      handleOpenSettings();
+      sendResponse({ success: true });
+      return true;
   }
 });
 
@@ -391,6 +404,47 @@ function handleChangeProvider(provider, sendResponse) {
   chrome.storage.local.set({ activeProvider: provider });
   
   sendResponse({ success: true });
+}
+
+// Handle transcript received from content script
+function handleTranscriptReceived(message, sender) {
+  console.log('Transcript received:', message.transcript);
+  
+  // Forward to content script for processing (if different tab)
+  if (sender.tab) {
+    chrome.tabs.sendMessage(sender.tab.id, {
+      type: 'TRANSCRIPT_RECEIVED',
+      transcript: message.transcript,
+      speaker: message.speaker,
+      final: message.final
+    });
+  }
+}
+
+// Handle speaker detection from content script
+function handleSpeakerDetected(message, sender) {
+  console.log('Speaker detected:', message.speaker, 'Volume:', message.volume);
+  
+  // Forward to content script for UI updates
+  if (sender.tab) {
+    chrome.tabs.sendMessage(sender.tab.id, {
+      type: 'SPEAKER_DETECTED',
+      speaker: message.speaker,
+      volume: message.volume,
+      isUserSpeaking: message.isUserSpeaking
+    });
+  }
+}
+
+// Handle clear context
+function handleClearContext(sendResponse) {
+  currentState.context = [];
+  sendResponse({ success: true });
+}
+
+// Handle opening settings
+function handleOpenSettings() {
+  chrome.runtime.openOptionsPage();
 }
 
 // Helper function to simulate AI response (would be replaced with actual API calls)

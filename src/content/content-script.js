@@ -821,8 +821,139 @@
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.type === 'TRANSCRIPT_RECEIVED') {
         processTranscript(message.transcript, message.speaker, message.final);
+      } else if (message.type === 'START_AUDIO_CAPTURE') {
+        handleStartAudioCapture(message, sendResponse);
+        return true; // Keep message channel open for async response
+      } else if (message.type === 'STOP_AUDIO_CAPTURE') {
+        handleStopAudioCapture(sendResponse);
+        return true;
       }
     });
+  }
+
+  // Handle start audio capture message from service worker
+  async function handleStartAudioCapture(message, sendResponse) {
+    console.log('Starting audio capture in content script...');
+    
+    try {
+      // Initialize audio capture if not already done
+      if (!window.interviewBuddyAudioCapture) {
+        // Import and initialize audio capture
+        const { default: AudioCapture } = await import(chrome.runtime.getURL('src/content/audio-capture.js'));
+        window.interviewBuddyAudioCapture = new AudioCapture();
+      }
+      
+      // Start audio capture with callbacks
+      await window.interviewBuddyAudioCapture.startCapture(
+        // onAudioData callback
+        (audioData) => {
+          // Send audio data to service worker for processing
+          chrome.runtime.sendMessage({
+            type: 'AUDIO_DATA',
+            data: audioData,
+            sessionId: message.sessionId
+          });
+        },
+        // onSpeakerDetected callback
+        (speakerInfo) => {
+          // Send speaker detection to service worker
+          chrome.runtime.sendMessage({
+            type: 'SPEAKER_DETECTED',
+            speaker: speakerInfo.speaker,
+            volume: speakerInfo.volume,
+            isUserSpeaking: speakerInfo.isUserSpeaking
+          });
+        }
+      );
+      
+      // Set up simple speech recognition for testing
+      if ('webkitSpeechRecognition' in window) {
+        setupSpeechRecognition(message.apiKey);
+      }
+      
+      sendResponse({ success: true });
+      console.log('✅ Audio capture started successfully');
+      
+    } catch (error) {
+      console.error('❌ Failed to start audio capture:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Handle stop audio capture message
+  function handleStopAudioCapture(sendResponse) {
+    console.log('Stopping audio capture in content script...');
+    
+    try {
+      if (window.interviewBuddyAudioCapture) {
+        window.interviewBuddyAudioCapture.stopCapture();
+      }
+      
+      if (window.speechRecognition) {
+        window.speechRecognition.stop();
+        window.speechRecognition = null;
+      }
+      
+      sendResponse({ success: true });
+      console.log('✅ Audio capture stopped');
+      
+    } catch (error) {
+      console.error('❌ Failed to stop audio capture:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }
+
+  // Setup Web Speech API for simpler transcription (fallback/testing)
+  function setupSpeechRecognition(apiKey) {
+    try {
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          const transcript = result[0].transcript;
+          
+          if (result.isFinal) {
+            console.log('Final transcript:', transcript);
+            
+            // Send transcript to background for processing
+            chrome.runtime.sendMessage({
+              type: 'TRANSCRIPT_RECEIVED',
+              transcript: transcript,
+              final: true,
+              speaker: 'user' // Web Speech API only captures user speech
+            });
+            
+            // Also process locally
+            processTranscript(transcript, 'user', true);
+          } else {
+            console.log('Interim transcript:', transcript);
+          }
+        }
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+      
+      recognition.onend = () => {
+        console.log('Speech recognition ended, restarting...');
+        if (state.isRecording) {
+          setTimeout(() => recognition.start(), 100);
+        }
+      };
+      
+      window.speechRecognition = recognition;
+      recognition.start();
+      
+      console.log('✅ Web Speech Recognition started');
+      
+    } catch (error) {
+      console.error('❌ Failed to setup speech recognition:', error);
+    }
   }
 
   // Process received transcript

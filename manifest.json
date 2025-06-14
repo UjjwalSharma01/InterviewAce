@@ -8,8 +8,7 @@
     "tabs",
     "activeTab",
     "scripting",
-    "desktopCapture",
-    "audioCapture"
+    "desktopCapture"
   ],
   "host_permissions": [
     "https://*.zoom.us/*",
